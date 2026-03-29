@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Image Background Remover Online - Remove BG Instantly</title>
+  <meta name="description" content="Remove image background online for free. 100% automatic, no signup required. Supports JPG, PNG, WebP. Download transparent PNG in seconds.">
+  <meta property="og:title" content="Free Image Background Remover">
+  <meta property="og:description" content="Remove image background online for free. 100% automatic, no signup required.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .checkerboard {
+      background-image:
+        linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+        linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+        linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    .gradient-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+    }
+    .gradient-btn:hover {
+      background: linear-gradient(135deg, #5a6fd6 0%, #6a3f8f 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    .drop-zone {
+      border: 2px dashed #c4c4c4;
+      transition: all 0.3s ease;
+    }
+    .drop-zone.dragover {
+      border-color: #667eea;
+      background-color: rgba(102, 126, 234, 0.05);
+    }
+    .slider-handle {
+      width: 4px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      cursor: ew-resize;
+    }
+    .comparison-container {
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+    }
+    .comparison-result {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-white min-h-screen">
+  <!-- Header -->
+  <header class="border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg gradient-btn flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="font-semibold text-gray-800">RemoveBG</span>
+      </div>
+      <nav class="flex items-center gap-6">
+        <a href="#" class="text-gray-600 hover:text-gray-900 text-sm">Home</a>
+        <a href="#features" class="text-gray-600 hover:text-gray-900 text-sm">Features</a>
+        <a href="#faq" class="text-gray-600 hover:text-gray-900 text-sm">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="py-16 px-4">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Remove Image Background <span class="gradient-btn bg-clip-text text-transparent">Free</span>
+        </h1>
+        <p class="text-lg text-gray-600 mb-8">
+          100% Automatic & Instant. No signup required. Supports JPG, PNG, WebP.
+        </p>
+
+        <!-- Upload Zone -->
+        <div id="uploadSection">
+          <div id="dropZone" class="drop-zone rounded-2xl p-12 cursor-pointer bg-gray-50">
+            <div id="uploadContent" class="text-center">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+              </div>
+              <p class="text-gray-700 font-medium mb-1">Drop image here or click to upload</p>
+              <p class="text-gray-400 text-sm">Supports JPG, PNG, WebP • Max 10MB</p>
+              <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden">
+            </div>
+          </div>
+          <p id="errorMsg" class="text-red-500 text-sm mt-3 hidden"></p>
+        </div>
+
+        <!-- Preview & Processing -->
+        <div id="previewSection" class="hidden mt-8">
+          <!-- Original Preview -->
+          <div class="mb-6">
+            <p class="text-sm text-gray-500 mb-2">Original Image</p>
+            <div class="inline-block rounded-xl overflow-hidden border border-gray-200">
+              <img id="previewImg" class="max-h-64 max-w-full object-contain" alt="Preview">
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button id="processBtn" class="gradient-btn text-white font-semibold px-8 py-4 rounded-xl text-lg mb-6 inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Remove Background
+          </button>
+
+          <!-- Loading State -->
+          <div id="loadingSection" class="hidden text-center">
+            <div class="inline-flex items-center gap-3 bg-gray-100 rounded-full px-6 py-3">
+              <svg class="animate-spin w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600">Processing... This usually takes 3-5 seconds</span>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div id="errorSection" class="hidden text-center">
+            <div class="inline-block bg-red-50 border border-red-200 rounded-xl px-6 py-4 mb-6">
+              <p id="errorText" class="text-red-600"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultSection" class="hidden mt-8">
+          <!-- Comparison Slider -->
+          <div class="mb-6">
+            <p class="text-sm text-gray-500 mb-2">Before & After</p>
+            <div class="comparison-container rounded-xl overflow-hidden border border-gray-200 max-w-lg mx-auto cursor-ew-resize" id="comparisonContainer">
+              <img id="resultImgBg" class="w-full max-h-96 object-contain checkerboard" alt="Background">
+              <div id="resultOverlay" class="comparison-result">
+                <img id="resultImg" class="w-full max-h-96 object-contain" alt="Result">
+              </div>
+              <div id="sliderLine" class="absolute top-0 bottom-0 slider-handle" style="left: 50%;"></div>
+            </div>
+          </div>
+
+          <!-- Download Button -->
+          <div class="flex flex-wrap justify-center gap-4">
+            <button id="downloadBtn" class="gradient-btn text-white font-semibold px-8 py-4 rounded-xl text-lg inline-flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Download PNG
+            </button>
+            <button id="resetBtn" class="bg-gray-100 text-gray-700 font-semibold px-8 py-4 rounded-xl text-lg hover:bg-gray-200 transition inline-flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Try Another Image
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-16 px-4 bg-gray-50">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Why Use Our Tool?</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+            <p class="text-gray-600 text-sm">Process images in seconds. No waiting, no queues. Powered by advanced AI.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">100% Private</h3>
+            <p class="text-gray-600 text-sm">Your images never stored. Processed in memory and deleted immediately.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Completely Free</h3>
+            <p class="text-gray-600 text-sm">No signup required. No credit card. Use it anytime, anywhere.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-16 px-4">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+          <details class="bg-gray-50 rounded-xl group">
+            <summary class="font-medium text-gray-900 cursor-pointer p-4">What image formats are supported?</summary>
+            <p class="text-gray-600 px-4 pb-4">We support JPG, PNG, and WebP formats. Maximum file size is 10MB per image.</p>
+          </details>
+          <details class="bg-gray-50 rounded-xl group">
+            <summary class="font-medium text-gray-900 cursor-pointer p-4">Is my image stored on your servers?</summary>
+            <p class="text-gray-600 px-4 pb-4">No! Your images are processed in memory and immediately deleted. We never store any of your data.</p>
+          </details>
+          <details class="bg-gray-50 rounded-xl group">
+            <summary class="font-medium text-gray-900 cursor-pointer p-4">How does it work?</summary>
+            <p class="text-gray-600 px-4 pb-4">We use Remove.bg's professional background removal API, which uses advanced AI to accurately detect and remove backgrounds from any image.</p>
+          </details>
+          <details class="bg-gray-50 rounded-xl group">
+            <summary class="font-medium text-gray-900 cursor-pointer p-4">Can I use it commercially?</summary>
+            <p class="text-gray-600 px-4 pb-4">Yes! Images processed with our tool can be used for personal or commercial purposes.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 py-8 px-4">
+    <div class="max-w-5xl mx-auto text-center text-gray-500 text-sm">
+      <p>&copy; 2026 RemoveBG. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('uploadSection');
+    const previewSection = document.getElementById('previewSection');
+    const resultSection = document.getElementById('resultSection');
+    const loadingSection = document.getElementById('loadingSection');
+    const errorSection = document.getElementById('errorSection');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const previewImg = document.getElementById('previewImg');
+    const resultImg = document.getElementById('resultImg');
+    const resultImgBg = document.getElementById('resultImgBg');
+    const errorMsg = document.getElementById('errorMsg');
+    const errorText = document.getElementById('errorText');
+    const comparisonContainer = document.getElementById('comparisonContainer');
+    const resultOverlay = document.getElementById('resultOverlay');
+    const sliderLine = document.getElementById('sliderLine');
+
+    let currentFile = null;
+    let currentResultBlob = null;
+    let sliderPosition = 50;
+
+    // File validation
+    function validateFile(file) {
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (!validTypes.includes(file.type)) {
+        return 'Unsupported format. Please use JPG, PNG, or WebP.';
+      }
+      if (file.size > maxSize) {
+        return 'File too large. Maximum size is 10MB.';
+      }
+      return null;
+    }
+
+    // Show error
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.remove('hidden');
+    }
+
+    // Hide error
+    function hideError() {
+      errorMsg.classList.add('hidden');
+    }
+
+    // Handle file selection
+    function handleFile(file) {
+      hideError();
+      const error = validateFile(file);
+      if (error) {
+        showError(error);
+        return;
+      }
+      currentFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        uploadSection.classList.add('hidden');
+        previewSection.classList.remove('hidden');
+        resultSection.classList.add('hidden');
+        errorSection.classList.add('hidden');
+        loadingSection.classList.add('hidden');
+        processBtn.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Click to upload
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+
+    // Process image
+    processBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+      processBtn.classList.add('hidden');
+      loadingSection.classList.remove('hidden');
+      errorSection.classList.add('hidden');
+
+      const formData = new FormData();
+      formData.append('image', currentFile);
+
+      try {
+        const response = await fetch('/api/remove-bg', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: Processing failed`);
+        }
+
+        currentResultBlob = await response.blob();
+        const resultUrl = URL.createObjectURL(currentResultBlob);
+        resultImg.src = resultUrl;
+        resultImgBg.src = resultUrl;
+
+        previewSection.classList.add('hidden');
+        resultSection.classList.remove('hidden');
+        initSlider();
+      } catch (err) {
+        loadingSection.classList.add('hidden');
+        processBtn.classList.remove('hidden');
+        errorSection.classList.remove('hidden');
+        errorText.textContent = err.message || 'An error occurred. Please try again.';
+      }
+    });
+
+    // Comparison slider
+    function initSlider() {
+      sliderPosition = 50;
+      updateSlider();
+    }
+
+    function updateSlider() {
+      resultOverlay.style.clipPath = `inset(0 ${100 - sliderPosition}% 0 0)`;
+      sliderLine.style.left = `${sliderPosition}%`;
+    }
+
+    comparisonContainer.addEventListener('mousemove', (e) => {
+      const rect = comparisonContainer.getBoundingClientRect();
+      sliderPosition = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      updateSlider();
+    });
+
+    comparisonContainer.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const rect = comparisonContainer.getBoundingClientRect();
+      const touch = e.touches[0];
+      sliderPosition = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+      updateSlider();
+    });
+
+    // Download
+    downloadBtn.addEventListener('click', () => {
+      if (!currentResultBlob || !currentFile) return;
+      const link = document.createElement('a');
+      const originalName = currentFile.name.replace(/\.[^/.]+$/, '');
+      link.download = `removed-bg-${originalName}.png`;
+      link.href = URL.createObjectURL(currentResultBlob);
+      link.click();
+    });
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      currentFile = null;
+      currentResultBlob = null;
+      fileInput.value = '';
+      uploadSection.classList.remove('hidden');
+      previewSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      loadingSection.classList.add('hidden');
+      errorSection.classList.add('hidden');
+      processBtn.classList.remove('hidden');
+      hideError();
+    });
+  </script>
+</body>
+</html>
